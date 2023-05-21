@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 export default function Login(props) {
   const [formLogin, setFormLogin] = useState({
@@ -12,6 +13,67 @@ export default function Login(props) {
     temp[champ] = e.target.value;
     setFormLogin(temp);
   };
+
+  const [alert, setAlert] = useState({
+    etat: 0,
+    message: "",
+    type: "",
+  });
+
+  const login = (e) => {
+    e.preventDefault();
+    axios
+      .post(`${props.APIUrl}/Admins/login`, formLogin)
+      .then((response) => {
+        console.log(response.data);
+        let alertTemp = { alert };
+        alertTemp.etat = 1;
+        alertTemp.message = "Login successfully";
+        alertTemp.type = "success";
+        setAlert(alertTemp);
+
+        let temp = {};
+        temp.username = response.data[0].username;
+        temp.valide = response.data[0].valide;
+        props.setAdmin(temp);
+        window.location.href="/dashboard";
+      })
+      .catch((e) => {
+        console.log(e);
+        let alertTemp = { alert };
+        alertTemp.etat = 1;
+        alertTemp.message = "Wrong username or password";
+        alertTemp.type = "error";
+        setAlert(alertTemp);
+      });
+  };
+
+  // Equivalent de componentdidmount
+  useEffect(() => {
+    if(Object.keys(props.Admin).length!==0)
+    {
+      window.location.href="/dashboard";
+    }
+
+
+    const parameters = new URLSearchParams(window.location.search);
+    const success = parameters.get("success");
+    const error = parameters.get("error");
+    if (success == "register") {
+      let alertTemp = { alert };
+      alertTemp.etat = 1;
+      alertTemp.message = "Admin user successfully added";
+      alertTemp.type = "success";
+      setAlert(alertTemp);
+    }
+    if (error == "login") {
+      let alertTemp = { alert };
+      alertTemp.etat = 1;
+      alertTemp.message = "Please login";
+      alertTemp.type = "error";
+      setAlert(alertTemp);
+    }
+  }, [setAlert]);
 
   return (
     <main>
@@ -45,7 +107,10 @@ export default function Login(props) {
                       </p>
                     </div>
 
-                    <form className="row g-3 needs-validation">
+                    <form
+                      className="row g-3 needs-validation"
+                      onSubmit={(e) => login(e)}
+                    >
                       <div className="col-12">
                         <label htmlFor="yourUsername" className="form-label">
                           Username
@@ -83,6 +148,13 @@ export default function Login(props) {
                           Please enter your password!
                         </div>
                       </div>
+
+                      {alert.etat === 1 && alert.type === "success" ? (
+                        <p style={{ color: "green" }}>{alert.message}</p>
+                      ) : null}
+                      {alert.etat === 1 && alert.type === "error" ? (
+                        <p style={{ color: "red" }}>{alert.message}</p>
+                      ) : null}
 
                       <div className="col-12">
                         <button className="btn btn-primary w-100" type="submit">

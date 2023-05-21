@@ -1,17 +1,48 @@
 import React, { Component, useState } from "react";
+import axios from "axios";
 
 function Register(props) {
   const [formRegister, setFormRegister] = useState({
     name: "",
     username: "",
     password: "",
+    valide: 0
   });
 
   const changerFormRegister = (e, champ) => {
     e.preventDefault();
-    let temp = {...formRegister };
+    let temp = { ...formRegister };
     temp[champ] = e.target.value;
     setFormRegister(temp);
+  };
+
+  const [alert, setAlert] = useState({
+    etat: 0,
+    message: "",
+    type: "",
+  });
+
+  const ajouterAdmin = (e) => {
+    e.preventDefault();
+    axios
+      .post(`${props.APIUrl}/Admins/insert`, formRegister)
+      .then((response) => {
+        let alertTemp = { alert };
+        alertTemp.etat = 1;
+        alertTemp.message = "Un utilisateur a été inséré avec succès";
+        alertTemp.type = "success";
+        setAlert(alertTemp);
+        window.location.href = '/?success=register';
+      })
+      .catch((e, response) => {
+        // console.log(e);
+        // console.log(e.response);
+        let alertTemp = { alert };
+        alertTemp.etat = 1;
+        alertTemp.message = e.response.data;
+        alertTemp.type = "error";
+        setAlert(alertTemp);
+      });
   };
 
   return (
@@ -46,7 +77,7 @@ function Register(props) {
                       </p>
                     </div>
 
-                    <form className="row g-3 needs-validation" noValidate>
+                    <form className="row g-3 needs-validation" onSubmit={(e)=>ajouterAdmin(e)}>
                       <div className="col-12">
                         <label htmlFor="yourName" className="form-label">
                           Your Name
@@ -102,6 +133,12 @@ function Register(props) {
                           Please enter your password!
                         </div>
                       </div>
+                      {alert.etat === 1 && alert.type === "success" ? (
+                        <p style={{ color: "green" }}>{alert.message}</p>
+                      ) : null}
+                      {alert.etat === 1 && alert.type === "error" ? (
+                        <p style={{ color: "red" }}>{alert.message}</p>
+                      ) : null}
 
                       <div className="col-12">
                         <button className="btn btn-primary w-100" type="submit">
