@@ -8,21 +8,19 @@ export default function App(props){
 
   const [APIUrl, setAPIUrl] = useState("http://localhost:4000");
 
-  const [Admin, setAdmin] = useState({});
-
     return (
       <>
         <Router>
           <Routes>
             <Route
               path="/"
-              element={<Login APIUrl={APIUrl} Admin={Admin} setAdmin={setAdmin} />}
+              element={<Login APIUrl={APIUrl} />}
             ></Route>
             <Route
               path="/register"
-              element={<Register APIUrl={APIUrl} Admin={Admin} />}
+              element={<Register APIUrl={APIUrl}  />}
             ></Route>
-            <Route path="/dashboard" element={<Dashboard APIUrl={APIUrl} Admin={Admin}/>}></Route>
+            <Route path="/dashboard" element={<Dashboard APIUrl={APIUrl} />}></Route>
           </Routes>
         </Router>
       </>

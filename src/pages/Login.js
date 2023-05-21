@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import ls from "local-storage";
 
 export default function Login(props) {
   const [formLogin, setFormLogin] = useState({
@@ -20,6 +21,8 @@ export default function Login(props) {
     type: "",
   });
 
+  const [admin, setAdmin] = useState({});
+
   const login = (e) => {
     e.preventDefault();
     axios
@@ -35,8 +38,8 @@ export default function Login(props) {
         let temp = {};
         temp.username = response.data[0].username;
         temp.valide = response.data[0].valide;
-        props.setAdmin(temp);
-        window.location.href="/dashboard";
+        ls.set("admin", JSON.stringify(temp));
+        window.location.href = "/dashboard";
       })
       .catch((e) => {
         console.log(e);
@@ -50,30 +53,34 @@ export default function Login(props) {
 
   // Equivalent de componentdidmount
   useEffect(() => {
-    if(Object.keys(props.Admin).length!==0)
-    {
-      window.location.href="/dashboard";
+    let adminTemp = { ...admin };
+    adminTemp = JSON.parse(ls.get("admin"));
+    setAdmin(adminTemp);
+    if (adminTemp === null) {
+    } else {
+      if (Object.keys(adminTemp).length !== 0) {
+        window.location.href = "/dashboard";
+      }
     }
-
 
     const parameters = new URLSearchParams(window.location.search);
     const success = parameters.get("success");
     const error = parameters.get("error");
     if (success == "register") {
-      let alertTemp = { alert };
+      let alertTemp = { ...alert };
       alertTemp.etat = 1;
       alertTemp.message = "Admin user successfully added";
       alertTemp.type = "success";
       setAlert(alertTemp);
     }
     if (error == "login") {
-      let alertTemp = { alert };
+      let alertTemp = { ...alert };
       alertTemp.etat = 1;
       alertTemp.message = "Please login";
       alertTemp.type = "error";
       setAlert(alertTemp);
     }
-  }, [setAlert]);
+  }, [setAlert, setAdmin]);
 
   return (
     <main>
